@@ -17,6 +17,9 @@
 //
 
 #import <Foundation/Foundation.h>
+
+// >> #if是条件编译，满足条件才参与编译
+// >> 这里的意思是:如果是iOS系统，就导入CoreBluetooth框架，否则如果是Mac系统，就导入IOBluetooth框架
 #if TARGET_OS_IPHONE
 #import <CoreBluetooth/CoreBluetooth.h>
 #elif TARGET_OS_MAC
@@ -33,9 +36,11 @@ extern NSString *const YMSCBVersion;
 @class YMSCBPeripheral;
 @class YMSCBCentralManager;
 
+// >> 用typedef给Block起别名
 typedef void (^YMSCBDiscoverCallbackBlockType)(CBPeripheral *, NSDictionary *, NSNumber *, NSError *);
 typedef void (^YMSCBRetrieveCallbackBlockType)(CBPeripheral *);
 
+// >> 这个框架是基于Block回调的框架(官方框架是基于「代理」进行回调的)
 /**
  Base class for defining a Bluetooth LE central.
  
@@ -57,6 +62,7 @@ typedef void (^YMSCBRetrieveCallbackBlockType)(CBPeripheral *);
  */
 @interface YMSCBCentralManager : NSObject <CBCentralManagerDelegate>
 
+// >> 被委托的对象将收到从这里发出的信息
 /** @name Properties */
 /**
  Pointer to delegate.
@@ -65,6 +71,7 @@ typedef void (^YMSCBRetrieveCallbackBlockType)(CBPeripheral *);
  */
 @property (nonatomic, weak) id<CBCentralManagerDelegate> delegate;
 
+// >> CBCentralManager单例
 /**
  The CBCentralManager object.
  
@@ -81,9 +88,11 @@ typedef void (^YMSCBRetrieveCallbackBlockType)(CBPeripheral *);
  */
 @property (atomic, strong) NSArray *knownPeripheralNames;
 
+// >> 用于判断manager是否在扫描中
 /// Flag to determine if manager is scanning.
 @property (atomic, assign) BOOL isScanning;
 
+// >> 保存发现和重新找回的硬件(外围设备)
 /**
  Array of YMSCBPeripheral instances.
  
@@ -91,19 +100,22 @@ typedef void (^YMSCBRetrieveCallbackBlockType)(CBPeripheral *);
  */
 @property (atomic, readonly, strong) NSArray *ymsPeripherals;
 
+// >> 找到的硬件数量
 /// Count of ymsPeripherals.
 @property (atomic, readonly, assign) NSUInteger count;
 
 /// API version.
 @property (atomic, readonly, assign) NSString *version;
 
-
+// >> 发现硬件的回调
 /// Peripheral Discovered Callback
 @property (atomic, copy) YMSCBDiscoverCallbackBlockType discoveredCallback;
 
+// >> 重新找回硬件的回调
 /// Peripheral Retreived Callback
 @property (atomic, copy) YMSCBRetrieveCallbackBlockType retrievedCallback;
 
+// >> 是否要将硬件保存到沙盒？（保存起来有什么用？）
 /// If YES, then discovered peripheral UUIDs are stored in standardUserDefaults.
 @property (atomic, assign) BOOL useStoredPeripherals;
 
@@ -132,6 +144,7 @@ typedef void (^YMSCBRetrieveCallbackBlockType)(CBPeripheral *);
 - (instancetype)initWithKnownPeripheralNames:(NSArray *)nameList queue:(dispatch_queue_t)queue useStoredPeripherals:(BOOL)useStore delegate:(id<CBCentralManagerDelegate>) delegate;
 
 #pragma mark - Peripheral Management
+// >> 判断是不是我们的硬件？
 /** @name Peripheral Management */
 /**
  Determines if peripheral is known by this app service.
@@ -152,18 +165,21 @@ typedef void (^YMSCBRetrieveCallbackBlockType)(CBPeripheral *);
  */
 - (void)handleFoundPeripheral:(CBPeripheral *)peripheral;
 
+// >> 根据索引返回硬件对象
 /**
  Returns the YSMCBPeripheral instance from ymsPeripherals at index.
  @param index An index within the bounds of ymsPeripherals.
  */
 - (YMSCBPeripheral *)peripheralAtIndex:(NSUInteger)index;
 
+// >> 往ymsPeripherals数组增加一个硬件对象
 /**
  Add YMSCBPeripheral instance to ymsPeripherals.
  @param yperipheral Instance of YMSCBPeripheral
  */
 - (void)addPeripheral:(YMSCBPeripheral *)yperipheral;
 
+// >> 从ymsPeripherals数组中删除一个硬件对象
 /**
  Remove yperipheral in ymsPeripherals and from standardUserDefaults if stored.
  
@@ -171,12 +187,14 @@ typedef void (^YMSCBRetrieveCallbackBlockType)(CBPeripheral *);
  */
 - (void)removePeripheral:(YMSCBPeripheral *)yperipheral;
 
+// >> 根据索引从ymsPeripherals数组中删除一个硬件对象
 /**
  Remove YMSCBPeripheral instance at index
  @param index The index from which to remove the object in ymsPeripherals. The value must not exceed the bounds of the array.
  */
 - (void)removePeripheralAtIndex:(NSUInteger)index;
 
+// >> 删除ymsPeripherals数组中所以硬件对象
 /**
  Remove all YMSCBPeripheral instances
  */
@@ -190,6 +208,7 @@ typedef void (^YMSCBRetrieveCallbackBlockType)(CBPeripheral *);
 - (YMSCBPeripheral *)findPeripheral:(CBPeripheral *)peripheral;
 
 #pragma mark - Scan Methods
+// >> 扫描的接口方法
 /** @name Scanning for Peripherals */
 /**
  Start CoreBluetooth scan for peripherals. This method is to be overridden.
@@ -200,6 +219,7 @@ typedef void (^YMSCBRetrieveCallbackBlockType)(CBPeripheral *);
  */
 - (void)startScan;
 
+// >> 根据UUID进行扫描的接口方法
 /**
  Wrapper around the method scanForPeripheralWithServices:options: in CBCentralManager.
  
@@ -210,6 +230,7 @@ typedef void (^YMSCBRetrieveCallbackBlockType)(CBPeripheral *);
  */
 - (void)scanForPeripheralsWithServices:(NSArray *)serviceUUIDs options:(NSDictionary *)options;
 
+// >> 根据UUID进行扫描的接口方法，并有扫描到设备的回调(回调的是硬件对象、广播信息, RSSI值)
 /**
  Scans for peripherals that are advertising service(s), invoking a callback block for each peripheral
  that is discovered.
@@ -227,7 +248,7 @@ typedef void (^YMSCBRetrieveCallbackBlockType)(CBPeripheral *);
  */
 - (void)scanForPeripheralsWithServices:(NSArray *)serviceUUIDs options:(NSDictionary *)options withBlock:(void (^)(CBPeripheral *peripheral, NSDictionary *advertisementData, NSNumber *RSSI, NSError *error))discoverCallback;
 
-
+// >> 停止扫描的接口方法
 /**
  Stop CoreBluetooth scan for peripherals.
  */
@@ -237,6 +258,7 @@ typedef void (^YMSCBRetrieveCallbackBlockType)(CBPeripheral *);
 #pragma mark - Retrieve Methods
 /** @name Retrieve Peripherals */
 
+// >> 这个是重新连接设备的方法吗？
 /**
  Retrieves a list of known peripherals by their UUIDs.
  
@@ -264,7 +286,8 @@ typedef void (^YMSCBRetrieveCallbackBlockType)(CBPeripheral *);
 
 #pragma mark - CBCentralManager state handling methods
 /** @name CBCentralManager manager state handling methods */
- 
+
+ // >> 手机的蓝牙状态
 /**
  Handler for when manager state is powered on.
  */

@@ -16,10 +16,14 @@
 //  Author: Charles Y. Choi <charles.choi@yummymelon.com>
 //
 
+// >> YMS128.h头文件，定义了一些结构体，整型类型的变量？
+
+// >> #ifndef是if not define的简写，这两句的意思是：利用「宏」及「條件編譯」防止重複「包含」
 #ifndef YMSCB_YMS128_h
 #define YMSCB_YMS128_h
 
 
+// >> 定义了一个结构体
 /**
  Struct to hold 128-bit value
  */

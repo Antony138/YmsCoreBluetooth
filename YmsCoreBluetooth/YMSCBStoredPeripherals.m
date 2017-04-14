@@ -25,7 +25,9 @@
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     NSArray *devices = [userDefaults arrayForKey:@"storedPeripherals"];
     if (devices == nil) {
+        // >> 这里初始化了一个保存所有硬件对象的仓库？
         [userDefaults setObject:@[] forKey:@"storedPeripherals"];
+        // >> 保存到沙盒
         [userDefaults synchronize];
     }
 
